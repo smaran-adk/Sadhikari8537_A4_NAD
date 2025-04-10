@@ -179,3 +179,24 @@ postForm.addEventListener('submit',e=>{
 
 })
 getData()
+
+Dropzone.autoDiscover = false;
+
+document.addEventListener('DOMContentLoaded', () => {
+    const dropzoneElement = document.querySelector("#my-dropzone");
+    if (dropzoneElement) {
+      const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+  
+      const myDropzone = new Dropzone("#my-dropzone", {
+        url: "/upload",
+        headers: {
+          "X-CSRFToken": csrfToken
+        },
+        maxFiles: 5,
+        acceptedFiles: "image/*",
+        init: function(){
+            console.log("DropZone initialized!");
+        }
+      });
+    }
+  });

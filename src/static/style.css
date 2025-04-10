@@ -1,3 +1,19 @@
 .not-visible {
     display: none; 
 }
+.dz{
+    border: dashed !important;
+    border-radius: 10px !important;
+    transition: border-color 0.3s ease-in-out;
+}
+.dz:hover,
+.dz.dz-drag-hover{
+    background-color: aliceblue !important;
+}
+
+.dz.dz-message{
+    text-align: center;
+    font-size: 1.2rem;
+    padding: 2rem 1rem;
+    color: #333;
+}
