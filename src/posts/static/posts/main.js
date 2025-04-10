@@ -34,6 +34,12 @@ const getCookie=(name)=> {
 }
 
 const csrftoken = getCookie('csrftoken');
+const deleted=localStorage.getItem('title')
+if(deleted){
+    handleAlerts('danger',`deleted"${deleted}"`)
+    localStorage.clear()
+}
+
 
 
 const likeUnlikePosts =()=>{

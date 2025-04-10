@@ -24,11 +24,11 @@ def post_list_and_create(request):
                 'author': instance.author.user.username,
                 'id': instance.id,
             })
-            return JsonResponse({'msg':'Post created!'})
+        
+        return JsonResponse({'msg':'Post created!'})
 
     context ={
         'form': form,
-        
     }
 
     return render(request, 'posts/main.html', context)
@@ -109,8 +109,39 @@ def like_unlike_post(request):
             return JsonResponse({'error': str(e)}, status=500)
 
     return JsonResponse({'error': 'Invalid request type'}, status=400)
+@require_POST
+@login_required
+def update_post(request,pk):
+    obj =Post.objects.get(pk=pk)
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        new_title=request.POST.get('title')
+        new_body=request.POST.get('body')
+
+        if not new_title or not new_body:
+            return JsonResponse({'error':'Title and Body cannot be empty.'},status=400)
+        
+        obj.title=new_title
+        obj.body=new_body
+        obj.save()
+        return JsonResponse({
+         'title': new_title,
+         'body': new_body,
+        })
+    
+@require_POST
+@login_required    
+def delete_post(request,pk):
+    try:
+        obj =Post.objects.get(pk=pk)
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            obj.delete()
+            return JsonResponse({'msg':'Post has been deleted successfully'})
+        return JsonResponse({'error': 'Invalid request'}, status=400)
+    except Post.DoesNotExist:
+        return JsonResponse({'error': 'Post not found'}, status=404)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'error': str(e)}, status=500)
 
 
-
-def hello_world_view(request):
-    return JsonResponse({'text': 'hello world x2'})
