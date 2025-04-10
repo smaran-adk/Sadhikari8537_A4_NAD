@@ -1,4 +1,4 @@
-from django.urls import path # type: ignore
+from django.urls import path 
 from .views import(
     post_list_and_create,
 
@@ -6,8 +6,9 @@ from .views import(
     like_unlike_post,
     post_detail,
     post_detail_data_view,
+    update_post,
     delete_post,
-    update_post
+    
 
 
     
@@ -20,7 +21,7 @@ urlpatterns =[
     path('like-unlike/',like_unlike_post, name='like_unlike'),
     path('<pk>/', post_detail, name='post-detail'),
     path('<pk>/update/', update_post, name='post-update'),
-    path('<pk>/delete/', update_post, name='post-delete'),
+    path('<pk>/delete/', delete_post, name='post-delete'),
 
 
 

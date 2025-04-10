@@ -24,6 +24,13 @@
 
 
     <!-- Custom js -->
+    <script>
+      function handleAlerts(type, message) {
+        const alertBox = document.getElementById('alert-box');
+        alertBox.innerHTML = `<div class="alert alert-${type}" role="alert">${message}</div>`;
+      }
+    </script>
+    
     <script src="{% static 'functions.js' %}" defer></script>
     {% block scripts %}
             <script src="{% static 'profiles/main.js' %}" defer></script>

@@ -17,6 +17,7 @@ const alertBox=document.getElementById('alert-box')
 console.log('csrf',csrf[0].value)
 
 
+
 const getCookie=(name)=> {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -33,12 +34,18 @@ const getCookie=(name)=> {
     return cookieValue;
 }
 
+function handleAlerts(type, message) {
+    alertBox.innerHTML = `<div class="alert alert-${type}" role="alert">${message}</div>`;
+}
+
+
 const csrftoken = getCookie('csrftoken');
 const deleted=localStorage.getItem('title')
-if(deleted){
-    handleAlerts('danger',`deleted"${deleted}"`)
-    localStorage.clear()
-}
+
+    if(deleted){
+        handleAlerts('danger',`deleted "${deleted}"`)
+        localStorage.clear()
+    }
 
 
 
@@ -90,7 +97,7 @@ const getData=()=>{
                             <div class="card-footer">
                             <div class="row">
                                 <div class="col-2">
-                                    <a href="${window.location.origin}/${el.id}" class="btn btn-primary">Details</a>
+                                    <a href="${window.location.origin}/${response.id}" class="btn btn-primary">Details</a>
                                 </div>
                                 <div class="col-2">
                                 <form class="like-unlike-forms" data-form-id="${el.id}">

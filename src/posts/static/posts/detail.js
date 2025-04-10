@@ -101,25 +101,26 @@ updateForm.addEventListener('submit',e=>{
     })
 })
 
-deleteForm.addEventListener('submit',e=>{
-    e.preventDefault()
+deleteForm.addEventListener('submit', e => {
+    e.preventDefault();
 
     $.ajax({
-        type:'POST',
+        type: 'POST',
         url: deleteUrl,
         headers: {
-            'X-Requested-With': 'XMLHttpRequest',  
+            'X-Requested-With': 'XMLHttpRequest'
         },
-        data:{
-            'csrfmiddlewaretoken':csrf[0].value,
+        data: {
+            'csrfmiddlewaretoken': csrf[0].value,
         },
-        success:function(response){
-            window.location.href = window.location.origin
-            localStorage.setItem('title',titleInput.value)
-
+        success: function (response) {
+            console.log(response);
+            localStorage.setItem('title', titleInput.value);
+            window.location.href = window.location.origin;
         },
-        error:function(error){
-            console.log(error)
+        error: function (error) {
+            console.log(error);
+            handleAlerts('danger', 'Failed to delete the post.');
         }
-    })
-})
+    });
+});
