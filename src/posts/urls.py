@@ -1,4 +1,7 @@
 from django.urls import path 
+from django.conf.urls.static import static
+from django.conf import settings
+
 from .views import(
     post_list_and_create,
 
@@ -24,10 +27,11 @@ urlpatterns =[
     path('<pk>/delete/', delete_post, name='post-delete'),
 
 
-
     path('data/<int:num_posts>/', load_post_data_view, name='posts-data'),
     path ('<pk>/data/', post_detail_data_view, name= 'post-detial-data'),
     
     
     
 ]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
