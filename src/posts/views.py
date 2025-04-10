@@ -1,6 +1,9 @@
 from django.shortcuts import render
 from .models import Post
 from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
+
 # Create your views here.
 
 def post_list_and_create(request):
@@ -21,10 +24,43 @@ def load_post_data_view(request, num_posts):
             'title':obj.title,
             'body':obj.body,
             'liked': True if request.user in obj.liked.all() else False,
+            'count': obj.like_count,
             'author':obj.author.user.username
         }
         data.append(item)
     return JsonResponse({'data':data[lower:upper],'size': size})
+
+@require_POST
+@login_required
+def like_unlike_post(request):
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        try:
+            pk = request.POST.get('pk')
+            if not pk:
+                return JsonResponse({'error': 'Missing post ID'}, status=400)
+
+            post = Post.objects.get(pk=pk)
+            user = request.user
+
+            if user in post.liked.all():
+                post.liked.remove(user)
+                liked = False
+            else:
+                post.liked.add(user)
+                liked = True
+
+            return JsonResponse({'liked': liked, 'count': post.like_count})
+
+        except Post.DoesNotExist:
+            return JsonResponse({'error': 'Post not found'}, status=404)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Invalid request type'}, status=400)
+
+
 
 def hello_world_view(request):
     return JsonResponse({'text': 'hello world x2'})
