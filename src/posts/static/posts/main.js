@@ -14,7 +14,10 @@ const url =window.location.href
 
 
 const alertBox=document.getElementById('alert-box')
-console.log('csrf',csrf[0].value)
+
+const dropzone = document.getElementById('my-dropzone')
+const addBtn=document.getElementById('add-btn')
+const closeBtns=[...document.getElementsByClassName('add-modal-close')]
 
 
 
@@ -97,11 +100,11 @@ const getData=()=>{
                             <div class="card-footer">
                             <div class="row">
                                 <div class="col-2">
-                                    <a href="${window.location.origin}/${el.id}" class="btn btn-primary">Details</a>
+                                    <a href="${window.location.origin}/${el.id}/" class="btn btn-primary">Details</a>
                                 </div>
                                 <div class="col-2">
                                 <form class="like-unlike-forms" data-form-id="${el.id}">
-                                    <button href="#" class="btn btn-primary" id="like-unlike-${el.id}">${el.liked ? `Unlike (${el.count})`: `Like (${el.count})`} </button>
+                                    <button class="btn btn-primary" id="like-unlike-${el.id}">${el.liked ? `Unlike (${el.count})`: `Like (${el.count})`} </button>
                                 </div>
                              </div>
                         </div>
@@ -121,6 +124,7 @@ const getData=()=>{
         },
         error: function(error){
             console.log(error)
+            handleAlerts('danger','Oops.... something went wrong');
         }
     })
 }
@@ -130,6 +134,8 @@ loadBtn.addEventListener('click',()=>{
     visible+=3
     getData()
 })
+
+let newPostId=null
 
 postForm.addEventListener('submit',e=>{
     e.preventDefault()
@@ -144,6 +150,7 @@ postForm.addEventListener('submit',e=>{
         },
         success: function(response){
             console.log(response)
+            newPostId=response.id
             postsBox.insertAdjacentHTML('afterbegin',`
                 <div class="card mb-2">
                     <div class="card-body">
@@ -153,19 +160,20 @@ postForm.addEventListener('submit',e=>{
                         <div class="card-footer">
                         <div class="row">
                             <div class="col-2">
-                                <a href="#" class="btn btn-primary">Details </a>
+                                <a href="${window.location.origin}/${response.id}/" class="btn btn-primary">Details </a>
                             </div>
                             <div class="col-2">
                             <form class="like-unlike-forms" data-form-id="${response.id}">
-                                <button href="#" class="btn btn-primary" id="like-unlike-${response.id}">Like (0) </button>
+                                <button class="btn btn-primary" id="like-unlike-${response.id}">Like (0) </button>
                             </div>
                         </div>
                         </div>
                 `)
                 likeUnlikePosts()
-                $('#addPostModal').modal('hide')
+                //$('#addPostModal').modal('hide')
+                dropzone.classList.remove('not-visible');
                 handleAlerts('success','New post added!')
-                postForm.reset()
+               //postForm.reset()
         },
         error:function(error){
             console.log(error)
@@ -173,14 +181,24 @@ postForm.addEventListener('submit',e=>{
         }
 
     })
-
-
-
-
 })
-getData()
 
-Dropzone.autoDiscover = false;
+addBtn.addEventListener('click',()=>{
+    dropzone.classList.remove('not-visible')
+})
+
+closeBtns.forEach(btn=> btn.addEventListener('click',()=>{
+    postForm.reset()
+    if(!dropzone.classList.contains('not-visible')){
+        dropzone.classList.add('not-visible')
+    }
+
+}))
+
+
+
+
+Dropzone.autoDiscover = false
 
 document.addEventListener('DOMContentLoaded', () => {
     const dropzoneElement = document.querySelector("#my-dropzone");
@@ -188,15 +206,23 @@ document.addEventListener('DOMContentLoaded', () => {
       const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
   
       const myDropzone = new Dropzone("#my-dropzone", {
-        url: "/upload",
+        url: "/upload/",
         headers: {
           "X-CSRFToken": csrfToken
         },
         maxFiles: 5,
         acceptedFiles: "image/*",
         init: function(){
+            this.on('sending', function(file, xhr,formData){
+                formData.append('csrfmiddlewaretoken',csrftoken)
+                formData.append('new_post_id', newPostId)
+            })
             console.log("DropZone initialized!");
-        }
-      });
+        },
+        maxFiles:5,
+        maxFilesize:4,
+        acceptedFiles: '.png,.jpg, .jpeg'
+      })
     }
-  });
+  })
+  getData()
