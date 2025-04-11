@@ -5,9 +5,11 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from .forms import PostForm
 from profiles.models import Profile
-
+from .utils import action_permission
+from django.contrib.auth.decorators import login_required
 # Create your views here.
 
+@login_required
 def post_list_and_create(request):
     form =PostForm(request.POST or None)
     # qs =Post.objects.all()
@@ -33,7 +35,7 @@ def post_list_and_create(request):
 
     return render(request, 'posts/main.html', context)
 
-
+@login_required
 def post_detail(request,pk):
     obj=Post.objects.get(pk=pk)
     form=PostForm()
@@ -44,7 +46,7 @@ def post_detail(request,pk):
     }
     
     return render(request, 'detail.html',context)
-
+@login_required
 def load_post_data_view(request, num_posts):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         visible=3
@@ -66,17 +68,19 @@ def load_post_data_view(request, num_posts):
             data.append(item)
         return JsonResponse({'data':data[lower:upper],'size': size})
 
-
+@login_required
 def post_detail_data_view(request,pk):
-    obj=Post.objects.get(pk=pk)
-    data={
-        'id':obj.id,
-        'title':obj.title,
-        'body': obj.body,
-        'author':obj.author.user.username,
-        'logged_in':request.user.username,
-    }
-    return JsonResponse({'data':data})
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        obj=Post.objects.get(pk=pk)
+        data={
+            'id':obj.id,
+            'title':obj.title,
+            'body': obj.body,
+            'author':obj.author.user.username,
+            'logged_in':request.user.username,
+        }
+        return JsonResponse({'data':data})
+    return redirect('posts:main-board')
 
 
 
@@ -108,9 +112,12 @@ def like_unlike_post(request):
             traceback.print_exc()
             return JsonResponse({'error': str(e)}, status=500)
 
-    return JsonResponse({'error': 'Invalid request type'}, status=400)
+    return redirect('posts:main-board')
+
 @require_POST
 @login_required
+@action_permission  
+
 def update_post(request,pk):
     obj =Post.objects.get(pk=pk)
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -127,16 +134,21 @@ def update_post(request,pk):
          'title': new_title,
          'body': new_body,
         })
+    return redirect('posts:main-board')
+
     
 @require_POST
-@login_required    
+@login_required  
+@action_permission  
 def delete_post(request,pk):
     try:
         obj =Post.objects.get(pk=pk)
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
             obj.delete()
             return JsonResponse({'msg':'Post has been deleted successfully'})
-        return JsonResponse({'error': 'Invalid request'}, status=400)
+        #return JsonResponse({'error': 'Invalid request'}, status=400)
+        return redirect('posts:main-board')
+
     except Post.DoesNotExist:
         return JsonResponse({'error': 'Post not found'}, status=404)
     except Exception as e:
